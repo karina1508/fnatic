@@ -1,6 +1,5 @@
 package com.fnatic.measurement
 
-import com.fnatic.measurement.model.Measurement
 import com.fnatic.measurement.model.MeasurementGrades
 import com.fnatic.measurement.model.MeasurementType
 import com.fnatic.measurement.ro.MeasurementRO
@@ -21,27 +20,26 @@ class MeasurementServiceImpl : MeasurementService {
         measurements.forEach { measurement ->
             when (MeasurementType.toMeasurementType(measurement.type)) {
                 MeasurementType.MOVE -> {
-                    measurement.grade = countIntValue(measurement.time, measurementGrades.move, 105, 105..250)
+                    measurement.grade = countGradeForLong(measurement.time, 105, 105..250)
                     measurementGrades.move += measurement.grade
                     measurementGrades.moveSize++
                 }
                 MeasurementType.BOMB -> {
-                    measurement.grade = countIntValue(measurement.time, measurementGrades.bomb, 4000)
-                    measurementGrades.bomb += measurement.grade
+                    measurement.grade = countGradeForLong(measurement.time,  4000)
                     measurementGrades.bombSize++
                 }
                 MeasurementType.BODY -> {
-                    measurement.grade = countBooleanValue(measurement.value, measurementGrades.body, 80)
+                    measurement.grade = countBooleanValue(measurement.value, 80)
                     measurementGrades.body += measurement.grade
                     measurementGrades.bodySize++
                 }
                 MeasurementType.HEADSHOT -> {
-                    measurement.grade = countBooleanValue(measurement.value, measurementGrades.headshot, 100)
+                    measurement.grade = countBooleanValue(measurement.value, 100)
                     measurementGrades.headshot += measurement.grade
                     measurementGrades.headshotSize++
                 }
                 MeasurementType.MISSES -> {
-                    measurement.grade = countIntValue(measurement.value, measurementGrades.misses, 60, 60..400)
+                    measurement.grade = countGradeForLong(measurement.value, 60, 60..400)
                     measurementGrades.misses += measurement.grade
                     measurementGrades.missesSize++
                 }
@@ -55,25 +53,25 @@ class MeasurementServiceImpl : MeasurementService {
         return measurementGrades
     }
 
-    fun countIntValue(value: Any?, count: Double, minValueRange: Int, secondValueRange: IntRange? = null): Double {
-        val intValue = value?.toString()?.toIntOrNull()
-        var valueCount = count
+    fun countGradeForLong(value: Any?, minValueRange: Int, secondValueRange: IntRange? = null): Double {
+        var valueCount = 0.0
+        val intValue = value?.toString()?.toLongOrNull()
         if (intValue != null) {
             if (intValue < minValueRange) {
-                valueCount += 100
+                valueCount = 100.0
             }
             if (secondValueRange != null && intValue in secondValueRange) {
-                valueCount += 70
+                valueCount = 70.0
             }
         }
         return valueCount
     }
 
-    fun countBooleanValue(value: Any?, body: Double, points: Int): Double {
+    fun countBooleanValue(value: Any?, points: Int): Double {
         val booleanValue = value?.toString()?.toBoolean()
-        var bombCount = body
+        var bombCount = 0.0
         if (booleanValue != null && booleanValue) {
-            bombCount += 80;
+            bombCount += 80
         }
         return bombCount
     }
